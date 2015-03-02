@@ -145,6 +145,85 @@ function ioAssocBase($socket, $command, $entityId, $key, $value, $v) {
 
 }
 
+
+function ioAssocInJsonBase($socket, $command, $entityId, $key, $deepKey, $value, $v) {
+
+    if(count($entityId) > 127) {
+        throw new \Exception("entityId length greater than 127");
+    }
+    if(count($key) > 127) {
+        throw new \Exception("key length greater than 127");
+    }
+
+    //1 byte - command
+    $commandBytes = [$command];
+    //1 byte -v mode
+    $verboseMode = [$v];
+    //4 bytes - uniqueInt for that request
+    $uniqueInt = Data\intToFourBytes(RequestIdDispenser::dispenseId());
+    //1 byte - length of entityId
+    $entityIdLength = [strlen($entityId)];
+    //0-127 bytes - entityId
+    $entityIdBytes = Data\stringToBytes($entityId);
+    //1 byte - length of key
+    $keyLength = [strlen($key)];
+    //0-127 bytes - key
+    $keyBytes = Data\stringToBytes($key);
+    //4 bytes - length of deepKey
+    $deepKeyLength = Data\intToFourBytes(strlen($deepKey));
+    //n bytes - deep_key
+    $deepKeyBytes = Data\stringToBytes($deepKey);
+    //4 bytes - length of val
+    $valueLength = Data\intToFourBytes(strlen($value));
+    //n bytes - val
+    $valueBytes = Data\stringToBytes($value);
+    $byteArray = array_merge($commandBytes, $verboseMode, $uniqueInt, $entityIdLength, $entityIdBytes, $keyLength, $keyBytes, $deepKeyLength, $deepKeyBytes, $valueLength, $valueBytes);
+
+    //send to server
+    sendByteArray($socket, $byteArray);
+    //wait for response, return it
+    return receiveServerTcpResponse($socket);
+
+}
+
+function ioDissocInJsonBase($socket, $command, $entityId, $key, $deepKey, $v) {
+
+    if(count($entityId) > 127) {
+        throw new \Exception("entityId length greater than 127");
+    }
+    if(count($key) > 127) {
+        throw new \Exception("key length greater than 127");
+    }
+
+    //1 byte - command
+    $commandBytes = [$command];
+    //1 byte -v mode
+    $verboseMode = [$v];
+    //4 bytes - uniqueInt for that request
+    $uniqueInt = Data\intToFourBytes(RequestIdDispenser::dispenseId());
+    //1 byte - length of entityId
+    $entityIdLength = [strlen($entityId)];
+    //0-127 bytes - entityId
+    $entityIdBytes = Data\stringToBytes($entityId);
+    //1 byte - length of key
+    $keyLength = [strlen($key)];
+    //0-127 bytes - key
+    $keyBytes = Data\stringToBytes($key);
+    //4 bytes - length of deepKey
+    $deepKeyLength = Data\intToFourBytes(strlen($deepKey));
+    //n bytes - deep_key
+    $deepKeyBytes = Data\stringToBytes($deepKey);
+    $byteArray = array_merge($commandBytes, $verboseMode, $uniqueInt, $entityIdLength, $entityIdBytes, $keyLength, $keyBytes, $deepKeyLength, $deepKeyBytes);
+
+    //send to server
+    sendByteArray($socket, $byteArray);
+    //wait for response, return it
+    return receiveServerTcpResponse($socket);
+
+}
+
+
+
 function ioGetKeyAsOfBase($socket, $command, $entityId, $key, $timestamp, $v) {
 
     if(count($entityId) > 127) {
@@ -205,7 +284,7 @@ function ioGetEntityAsOfBase($socket, $command, $entityId, $timestamp, $v) {
     return receiveServerTcpResponse($socket);
 }
 
-function ioGetAllVersionsBetweenBase($socket, $command, $entityId, $timestampStart, $timestampEnd, $v) {
+function ioGetAllVersionsBetweenBase($socket, $command, $entityId, $timestampStart, $timestampEnd, $limit, $v) {
 
     if(count($entityId) > 127) {
         throw new \Exception("entityId length greater than 127");
@@ -225,8 +304,9 @@ function ioGetAllVersionsBetweenBase($socket, $command, $entityId, $timestampSta
     $timestampStartBytes = Data\stringToBytes($timestampStart);
     //19 bytes - length of timestamp as a string
     $timestampEndBytes = Data\stringToBytes($timestampEnd);
-
-    $byteArray = array_merge($commandBytes, $verboseMode, $uniqueInt, $entityIdLength, $entityIdBytes, $timestampStartBytes, $timestampEndBytes);
+    //4 bytes - limit
+    $limitBytes = Data\intToFourBytes($limit);
+    $byteArray = array_merge($commandBytes, $verboseMode, $uniqueInt, $entityIdLength, $entityIdBytes, $timestampStartBytes, $timestampEndBytes, $limitBytes);
 
     //send to server
     sendByteArray($socket, $byteArray);
@@ -240,20 +320,20 @@ function ioAssocJson($entityId, $key, $value) {
     return ioAssocBase(Socket::$socket, 0, $entityId, $key, json_encode($value), 0);
 }
 
-function ioAssocInJson($entityId, array $deepKey, $val) {
-    return ioAssocBase(Socket::$socket, 3, $entityId, json_encode($deepKey), $val, 0);
+function ioAssocInJson($entityId, $key, array $deepKey, $val) {
+    return ioAssocInJsonBase(Socket::$socket, 3, $entityId, $key, json_encode($deepKey), $val, 0);
 }
 
 function ioAssocString($entityId, $key, $value) {
     return ioAssocBase(Socket::$socket, 1, $entityId, $key, $value, 0);
 }
 
-function ioDissocString($entityId, $key) {
+function ioDissoc($entityId, $key) {
     return ioDissocBase(Socket::$socket, 2, $entityId, $key, 0);
 }
 
-function ioDissocInJson($entityId, array $deepKey) {
-    return ioDissocBase(Socket::$socket, 4, $entityId, json_encode($deepKey), 0);
+function ioDissocInJson($entityId, $key, array $deepKey) {
+    return ioDissocInJsonBase(Socket::$socket, 4, $entityId, $key, json_encode($deepKey), 0);
 }
 
 //reads
@@ -273,8 +353,8 @@ function ioGetEntityAsOf($entityId, $timestamp) {
     return ioGetEntityAsOfBase(Socket::$socket, -127, $entityId, SystemClock\convertTimestampToNano($timestamp), 0);
 }
 
-function ioGetAllVersionsBetween($entityId, $timestampStart, $timestampEnd) {
-    return ioGetAllVersionsBetweenBase(Socket::$socket, -126, $entityId, SystemClock\convertTimestampToNano($timestampStart), SystemClock\convertTimestampToNano($timestampEnd), 0);
+function ioGetAllVersionsBetween($entityId, $timestampStart, $timestampEnd, $limit) {
+    return ioGetAllVersionsBetweenBase(Socket::$socket, -126, $entityId, SystemClock\convertTimestampToNano($timestampStart), SystemClock\convertTimestampToNano($timestampEnd), $limit, 0);
 }
 
 function connectToServer($ipAddress, $port) {
@@ -285,22 +365,25 @@ function connectToServer($ipAddress, $port) {
 connectToServer("127.0.0.1", 10000);
 
 
-var_dump(ioAssocString("users", "k-1", "v-1"));
+//var_dump(ioAssocString("api-users", "k-2", "big-data-v2"));
 
-var_dump(ioDissocString("users", "k-1"));
+//var_dump(ioDissoc("api-users", "k-1"));
+//
+//var_dump(ioAssocJson("api-users", "k-1", ["names" => ["will" => "data1-v2", "rangel" => "data2-v2"]]));
+//var_dump(ioAssocJson("api-users", "k-1", ["names" => [["first" => "will", "last" => "king"], ["first" => "rangel", "last" => "spasov"]]]));
 
-var_dump(ioAssocJson("users", "k-1", ["result" => []]));
+//
+//var_dump(ioAssocInJson("api-users", "k-1", ["names"], "king-new-2"));
+//
+//var_dump(ioDissocInJson("api-users", "k-1", ["names"]));
+//
+//var_dump(ioGetKeyAsOfNow("api-users", "k-1"));
+//
+//var_dump(ioGetKeyAsOf("api-users", "k-1", time()));
+//
+//var_dump(ioGetEntityAsOfNow("api-users"));
+//
+//var_dump(ioGetEntityAsOf("users", time() - 1));
+//
+var_dump(ioGetAllVersionsBetween("api-users", time(), time() - 3600, 1000));
 
-var_dump(ioAssocInJson("users", ["names", 0, "last"], "new-val"));
-
-var_dump(ioDissocInJson("users", ["names", 0, "last"]));
-
-var_dump(ioGetKeyAsOfNow("users", "u-1"));
-
-var_dump(ioGetKeyAsOf("users", "u-1", time() - 3600));
-
-var_dump(ioGetEntityAsOfNow("users"));
-
-var_dump(ioGetEntityAsOf("users", time() - 1));
-
-var_dump(ioGetAllVersionsBetween("users", time(), time() - 3600));
