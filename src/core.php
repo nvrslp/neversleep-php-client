@@ -7,6 +7,8 @@ include "socket.php";
 include "request_id_dispenser.php";
 include "system_clock.php";
 
+ini_set('memory_limit','1024M');
+
 use DataManipulation as Data;
 use Socket as S;
 use RequestIdDispenser\RequestIdDispenser as RequestIdDispenser;
@@ -132,10 +134,10 @@ function ioAssocBase($socket, $command, $entityId, $key, $value, $v) {
     $keyLength = [strlen($key)];
     //0-127 bytes - key
     $keyBytes = Data\stringToBytes($key);
-    //4 bytes - length of val
-    $valueLength = Data\intToFourBytes(strlen($value));
     //n bytes - val
-    $valueBytes = Data\stringToBytes($value);
+    $valueBytes = Data\dispatchToType($value);
+    //4 bytes - length of val
+    $valueLength = Data\intToFourBytes(count($valueBytes));
     $byteArray = array_merge($commandBytes, $verboseMode, $uniqueInt, $entityIdLength, $entityIdBytes, $keyLength, $keyBytes, $valueLength, $valueBytes);
 
     //send to server
@@ -173,10 +175,10 @@ function ioAssocInJsonBase($socket, $command, $entityId, $key, $deepKey, $value,
     $deepKeyLength = Data\intToFourBytes(strlen($deepKey));
     //n bytes - deep_key
     $deepKeyBytes = Data\stringToBytes($deepKey);
-    //4 bytes - length of val
-    $valueLength = Data\intToFourBytes(strlen($value));
     //n bytes - val
-    $valueBytes = Data\stringToBytes($value);
+    $valueBytes = Data\dispatchToType($value);
+    //4 bytes - length of val
+    $valueLength = Data\intToFourBytes(count($valueBytes));
     $byteArray = array_merge($commandBytes, $verboseMode, $uniqueInt, $entityIdLength, $entityIdBytes, $keyLength, $keyBytes, $deepKeyLength, $deepKeyBytes, $valueLength, $valueBytes);
 
     //send to server
@@ -316,16 +318,12 @@ function ioGetAllVersionsBetweenBase($socket, $command, $entityId, $timestampSta
 
 //PUBLIC API
 //writes
-function ioAssocJson($entityId, $key, $value) {
-    return ioAssocBase(Socket::$socket, 0, $entityId, $key, json_encode($value), 0);
-}
-
-function ioAssocInJson($entityId, $key, array $deepKey, $val) {
-    return ioAssocInJsonBase(Socket::$socket, 3, $entityId, $key, json_encode($deepKey), $val, 0);
-}
-
-function ioAssocString($entityId, $key, $value) {
+function ioAssoc($entityId, $key, $value) {
     return ioAssocBase(Socket::$socket, 1, $entityId, $key, $value, 0);
+}
+
+function ioAssocInJson($entityId, $key, array $deepKey, $value) {
+    return ioAssocInJsonBase(Socket::$socket, 3, $entityId, $key, json_encode($deepKey), $value, 0);
 }
 
 function ioDissoc($entityId, $key) {
@@ -337,16 +335,16 @@ function ioDissocInJson($entityId, $key, array $deepKey) {
 }
 
 //reads
-function ioGetKeyAsOfNow($entityId, $key) {
-    return ioGetKeyAsOfBase(Socket::$socket, -128, $entityId, $key, SystemClock\getTime(), 0);
+function ioGetKeyLatest($entityId, $key) {
+    return ioGetKeyAsOfBase(Socket::$socket, -128, $entityId, $key, SystemClock\serverLatest(), 0);
 }
 
 function ioGetKeyAsOf($entityId, $key, $timestamp) {
     return ioGetKeyAsOfBase(Socket::$socket, -128, $entityId, $key, SystemClock\convertTimestampToNano($timestamp), 0);
 }
 
-function ioGetEntityAsOfNow($entityId) {
-    return ioGetEntityAsOfBase(Socket::$socket, -127, $entityId, SystemClock\getTime(), 0);
+function ioGetEntityLatest($entityId) {
+    return ioGetEntityAsOfBase(Socket::$socket, -127, $entityId, SystemClock\serverLatest(), 0);
 }
 
 function ioGetEntityAsOf($entityId, $timestamp) {
@@ -365,25 +363,35 @@ function connectToServer($ipAddress, $port) {
 connectToServer("127.0.0.1", 10000);
 
 
-//var_dump(ioAssocString("api-users", "k-2", "big-data-v2"));
+//var_dump(ioAssoc("api-users-4", "k-2", 1));
 
-//var_dump(ioDissoc("api-users", "k-1"));
+var_dump(ioGetEntityLatest("api-users-4"));
+
+//var_dump(ioAssoc("api-users-4", "k-2", ["a" => 1]));
+
+
+//var_dump(ioDissoc("api-users-3", "k-2"));
 //
-//var_dump(ioAssocJson("api-users", "k-1", ["names" => ["will" => "data1-v2", "rangel" => "data2-v2"]]));
+//var_dump(ioAssocJson("api-users-3", "k-2", ["names" => [["first" => "will", "last" => "king"], ["first" => "rangel", "last" => "spasov"]]]));
 //var_dump(ioAssocJson("api-users", "k-1", ["names" => [["first" => "will", "last" => "king"], ["first" => "rangel", "last" => "spasov"]]]));
 
 //
-//var_dump(ioAssocInJson("api-users", "k-1", ["names"], "king-new-2"));
+//var_dump(ioAssocInJson("api-users-4", "k-2", ["b"], "two"));
 //
-//var_dump(ioDissocInJson("api-users", "k-1", ["names"]));
+//var_dump(ioDissocInJson("api-users-4", "k-2", ["b"]));
 //
 //var_dump(ioGetKeyAsOfNow("api-users", "k-1"));
 //
 //var_dump(ioGetKeyAsOf("api-users", "k-1", time()));
 //
-//var_dump(ioGetEntityAsOfNow("api-users"));
+//var_dump(ioGetEntityAsOfNow("api-users-3"));
 //
-//var_dump(ioGetEntityAsOf("users", time() - 1));
-//
-var_dump(ioGetAllVersionsBetween("api-users", time(), time() - 3600, 1000));
+//var_dump(ioGetEntityAsOf("api-users-3", time() + 1));
 
+//var_dump(ioGetEntityAsOfNow("api-users-3"));
+
+//
+//var_dump(ioGetAllVersionsBetween("api-users-4", time(), time() - 3600, 1000));
+
+
+//var_dump(SystemClock\convertTimestampToNano(0));
