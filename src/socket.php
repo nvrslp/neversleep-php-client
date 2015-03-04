@@ -6,6 +6,7 @@
 namespace Socket;
 
 /**
+ * @throws \Exception
  * @return resource
  */
 function socketCreate()
@@ -14,16 +15,16 @@ function socketCreate()
         //error check
         $errorCode = socket_last_error($socket);
         $errorMsg = socket_strerror($errorCode);
-        die("Couldn't create socket: [$errorCode] $errorMsg \n");
+        throw new \Exception ("Couldn't create socket: [$errorCode] $errorMsg");
     }
-    echo "Socket created  \n";
-
+    //socket created
     return $socket;
 }
 
 /**
  * @param $ip
  * @param $port
+ * @throws \Exception
  * @return resource
  */
 function socketConnect($ip, $port)
@@ -34,17 +35,16 @@ function socketConnect($ip, $port)
         //error check
         $errorCode = socket_last_error($socket);
         $errorMsg = socket_strerror($errorCode);
-        die("Couldn't connect: [$errorCode] $errorMsg \n");
+        throw new \Exception ("Couldn't connect: [$errorCode] $errorMsg");
     }
-
-    echo "Socket connected  \n";
-
+    //socket connected
     return $socket;
 }
 
 /**
  * @param $socket
  * @param $string
+ * @throws \Exception
  * @return bool
  */
 function socketSend($socket, $string)
@@ -54,16 +54,16 @@ function socketSend($socket, $string)
         //error check
         $errorCode = socket_last_error($socket);
         $errorMsg = socket_strerror($errorCode);
-        die("Couldn't send data: [$errorCode] $errorMsg \n");
+        throw new \Exception ("Couldn't send data: [$errorCode] $errorMsg");
     }
-    echo "Message send successfully \n";
-
+    //message sent successfully
     return true;
 
 }
 /**
  * @param $socket
  * @param $numOfBytesToReceive
+ * @throws \Exception
  * @return array - byte array
  */
 function socketReceive($socket, $numOfBytesToReceive)
@@ -72,9 +72,8 @@ function socketReceive($socket, $numOfBytesToReceive)
     if (socket_recv($socket, $buf, $numOfBytesToReceive, MSG_WAITALL) === false) {
         $errorCode = socket_last_error();
         $errorMsg = socket_strerror($errorCode);
-        die("Could not receive data: [$errorCode] $errorMsg \n");
+        throw new \Exception ("Could not receive data: [$errorCode] $errorMsg");
     }
-
     //convert the string to a byte array
     return unpack("C*", $buf);
 
