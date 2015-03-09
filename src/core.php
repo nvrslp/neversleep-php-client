@@ -420,7 +420,7 @@ connectToServer("127.0.0.1", 10000);
 
 //var_dump(ioGetEntityLatest("api-users-4"));
 //
-var_dump(ioAssoc("api-users", "k-2", ["a" => 2]));
+//var_dump(ioAssoc("api-users-99", "k-1", 2));
 //var_dump(ioAssoc("api-users", "k-1", 1));
 //var_dump(ioAssoc("api-users", "k-1", true));
 //var_dump(ioAssoc("api-users", "k-1", "v-1"));
@@ -438,12 +438,13 @@ var_dump(ioAssoc("api-users", "k-2", ["a" => 2]));
 //
 //var_dump(ioGetKeyAsOf("api-users", "k-1", time()));
 //
-//var_dump(ioGetEntityAsOfNow("api-users-3"));
+//var_dump(ioGetEntityLatest("api-users-99"));
 //
-//var_dump(ioGetEntityAsOf("api-users", time() + 1));
+//var_dump(ioGetEntityAsOf("api-users-99", time() - 60));
 
 //var_dump(ioGetEntityLatest("api-users"));
 
 //
-//var_dump(json_decode(ioGetAllVersionsBetweenNowAnd("api-users", time() - 3600, 1)), true);
+//var_dump(json_decode(ioGetAllVersionsBetweenNowAnd("api-users-99", time() - 3600, 99)), true);
 
+var_dump(ioGetAllVersionsBetweenNowAnd("api-users-99", time() - 3600, 99));;

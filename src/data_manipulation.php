@@ -6,7 +6,7 @@
 namespace DataManipulation;
 
 function prefixByte($byte, $byteArray) {
-    if($byte < -128 || $byte > 128){
+    if($byte < -128 || $byte > 127){
         throw new \Exception("Byte out of range: $byte");
     }
     else {
