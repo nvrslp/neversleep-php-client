@@ -413,12 +413,12 @@ function connectToServer($ipAddress, $port)
 }
 
 //TODO remove this for production
-connectToServer("127.0.0.1", 10000);
+connectToServer("54.174.129.3", 10000);
 
 
 //var_dump(ioAssoc("api-users", "k-2", ["names" => [["first" => "will", "last" => "king"], ["first" => "rangel", "last" => "spasov"]]]));
 
-//var_dump(ioGetEntityLatest("api-users-4"));
+//var_dump(ioGetEntityLatest("api-users"));
 //
 //var_dump(ioAssoc("api-users-99", "k-1", 2));
 //var_dump(ioAssoc("api-users", "k-1", 1));
@@ -442,9 +442,16 @@ connectToServer("127.0.0.1", 10000);
 //
 //var_dump(ioGetEntityAsOf("api-users-99", time() - 60));
 
-//var_dump(ioGetEntityLatest("api-users"));
+var_dump(ioGetEntityLatest("users-test-3"));
 
 //
 //var_dump(json_decode(ioGetAllVersionsBetweenNowAnd("api-users-99", time() - 3600, 99)), true);
 
-var_dump(ioGetAllVersionsBetweenNowAnd("api-users-99", time() - 3600, 99));;
+//var_dump(ioGetAllVersionsBetweenNowAnd("api-users-99", time() - 3600, 99));;
+
+function test_1() {
+    for($i = 1; $i < 2500; $i++) {
+        ioAssoc("users-test-3", "k-".$i, "v-".$i);
+    }
+}
+test_1();
