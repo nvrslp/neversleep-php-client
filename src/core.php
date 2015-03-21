@@ -126,14 +126,14 @@ function ioDissocBase($socket, $command, $entityId, $key, $v)
     $verboseMode = [$v];
     //16 bytes - request UUID
     $requestUUID = RequestIdDispenser::dispenseUUIDBytes();
-    //1 byte - length of entityId
-    $entityIdLength = [strlen($entityId)];
     //0-127 bytes - entityId
     $entityIdBytes = Data\stringToBytes($entityId);
-    //1 byte - length of key
-    $keyLength = [strlen($key)];
+    //1 byte - length of entityId
+    $entityIdLength = [count($entityIdBytes)];
     //0-127 bytes - key
     $keyBytes = Data\stringToBytes($key);
+    //1 byte - length of key
+    $keyLength = [count($keyBytes)];
 
     $byteArray = array_merge($commandBytes, $verboseMode, $requestUUID, $entityIdLength, $entityIdBytes, $keyLength,
         $keyBytes);
@@ -171,14 +171,14 @@ function ioAssocBase($socket, $command, $entityId, $key, $value, $v)
     $verboseMode = [$v];
     //16 bytes - request UUID
     $requestUUID = RequestIdDispenser::dispenseUUIDBytes();
-    //1 byte - length of entityId
-    $entityIdLength = [strlen($entityId)];
     //0-127 bytes - entityId
     $entityIdBytes = Data\stringToBytes($entityId);
-    //1 byte - length of key
-    $keyLength = [strlen($key)];
+    //1 byte - length of entityId
+    $entityIdLength = [count($entityIdBytes)];
     //0-127 bytes - key
     $keyBytes = Data\stringToBytes($key);
+    //1 byte - length of key
+    $keyLength = [count($keyBytes)];
     //n bytes - val
     $valueBytes = Data\dispatchToType($value);
     //4 bytes - length of val
@@ -207,14 +207,14 @@ function ioAssocInJsonBase($socket, $command, $entityId, $key, $deepKey, $value,
     $verboseMode = [$v];
     //16 bytes - request UUID
     $requestUUID = RequestIdDispenser::dispenseUUIDBytes();
-    //1 byte - length of entityId
-    $entityIdLength = [strlen($entityId)];
     //0-127 bytes - entityId
     $entityIdBytes = Data\stringToBytes($entityId);
-    //1 byte - length of key
-    $keyLength = [strlen($key)];
+    //1 byte - length of entityId
+    $entityIdLength = [count($entityIdBytes)];
     //0-127 bytes - key
     $keyBytes = Data\stringToBytes($key);
+    //1 byte - length of key
+    $keyLength = [count($keyBytes)];
     //4 bytes - length of deepKey
     $deepKeyLength = Data\intToFourBytes(strlen($deepKey));
     //n bytes - deep_key
@@ -246,14 +246,14 @@ function ioDissocInJsonBase($socket, $command, $entityId, $key, $deepKey, $v)
     $verboseMode = [$v];
     //16 bytes - request UUID
     $requestUUID = RequestIdDispenser::dispenseUUIDBytes();
-    //1 byte - length of entityId
-    $entityIdLength = [strlen($entityId)];
     //0-127 bytes - entityId
     $entityIdBytes = Data\stringToBytes($entityId);
-    //1 byte - length of key
-    $keyLength = [strlen($key)];
+    //1 byte - length of entityId
+    $entityIdLength = [count($entityIdBytes)];
     //0-127 bytes - key
     $keyBytes = Data\stringToBytes($key);
+    //1 byte - length of key
+    $keyLength = [count($keyBytes)];
     //4 bytes - length of deepKey
     $deepKeyLength = Data\intToFourBytes(strlen($deepKey));
     //n bytes - deep_key
@@ -282,14 +282,14 @@ function ioGetKeyAsOfBase($socket, $command, $entityId, $key, $timestamp, $v)
     $verboseMode = [$v];
     //16 bytes - request UUID
     $requestUUID = RequestIdDispenser::dispenseUUIDBytes();
-    //1 byte - length of entityId
-    $entityIdLength = [strlen($entityId)];
     //0-127 bytes - entityId
     $entityIdBytes = Data\stringToBytes($entityId);
-    //1 byte - length of key
-    $keyLength = [strlen($key)];
+    //1 byte - length of entityId
+    $entityIdLength = [count($entityIdBytes)];
     //0-127 bytes - key
     $keyBytes = Data\stringToBytes($key);
+    //1 byte - length of key
+    $keyLength = [count($keyBytes)];
     //19 bytes - length of timestamp as a string
     $timestampLength = Data\stringToBytes($timestamp);
     $byteArray = array_merge($commandBytes, $verboseMode, $requestUUID, $entityIdLength, $entityIdBytes, $keyLength,
@@ -313,10 +313,10 @@ function ioGetEntityAsOfBase($socket, $command, $entityId, $timestamp, $v)
     $verboseMode = [$v];
     //16 bytes - request UUID
     $requestUUID = RequestIdDispenser::dispenseUUIDBytes();
-    //1 byte - length of entityId
-    $entityIdLength = [strlen($entityId)];
     //0-127 bytes - entityId
     $entityIdBytes = Data\stringToBytes($entityId);
+    //1 byte - length of entityId
+    $entityIdLength = [count($entityIdBytes)];
     //19 bytes - length of timestamp as a string
     $timestampBytes = Data\stringToBytes($timestamp);
     $byteArray = array_merge($commandBytes, $verboseMode, $requestUUID, $entityIdLength, $entityIdBytes, $timestampBytes);
@@ -338,10 +338,10 @@ function ioGetAllVersionsBetweenBase($socket, $command, $entityId, $timestampSta
     $verboseMode = [$v];
     //16 bytes - request UUID
     $requestUUID = RequestIdDispenser::dispenseUUIDBytes();
-    //1 byte - length of entityId
-    $entityIdLength = [strlen($entityId)];
     //0-127 bytes - entityId
     $entityIdBytes = Data\stringToBytes($entityId);
+    //1 byte - length of entityId
+    $entityIdLength = [count($entityIdBytes)];
     //19 bytes - length of timestamp as a string
     $timestampStartBytes = Data\stringToBytes($timestampStart);
     //19 bytes - length of timestamp as a string
