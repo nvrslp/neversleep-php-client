@@ -124,8 +124,8 @@ function ioDissocBase($socket, $command, $entityId, $key, $v)
     $commandBytes = [$command];
     //1 byte -v mode
     $verboseMode = [$v];
-    //4 bytes - uniqueInt for that request
-    $uniqueInt = Data\intToFourBytes(RequestIdDispenser::dispenseId());
+    //16 bytes - request UUID
+    $requestUUID = RequestIdDispenser::dispenseUUIDBytes();
     //1 byte - length of entityId
     $entityIdLength = [strlen($entityId)];
     //0-127 bytes - entityId
@@ -135,7 +135,7 @@ function ioDissocBase($socket, $command, $entityId, $key, $v)
     //0-127 bytes - key
     $keyBytes = Data\stringToBytes($key);
 
-    $byteArray = array_merge($commandBytes, $verboseMode, $uniqueInt, $entityIdLength, $entityIdBytes, $keyLength,
+    $byteArray = array_merge($commandBytes, $verboseMode, $requestUUID, $entityIdLength, $entityIdBytes, $keyLength,
         $keyBytes);
 
     return tcpRequestResponce($socket, $byteArray);
@@ -169,8 +169,8 @@ function ioAssocBase($socket, $command, $entityId, $key, $value, $v)
     $commandBytes = [$command];
     //1 byte -v mode
     $verboseMode = [$v];
-    //4 bytes - uniqueInt for that request
-    $uniqueInt = Data\intToFourBytes(RequestIdDispenser::dispenseId());
+    //16 bytes - request UUID
+    $requestUUID = RequestIdDispenser::dispenseUUIDBytes();
     //1 byte - length of entityId
     $entityIdLength = [strlen($entityId)];
     //0-127 bytes - entityId
@@ -183,7 +183,7 @@ function ioAssocBase($socket, $command, $entityId, $key, $value, $v)
     $valueBytes = Data\dispatchToType($value);
     //4 bytes - length of val
     $valueLength = Data\intToFourBytes(count($valueBytes));
-    $byteArray = array_merge($commandBytes, $verboseMode, $uniqueInt, $entityIdLength, $entityIdBytes, $keyLength,
+    $byteArray = array_merge($commandBytes, $verboseMode, $requestUUID, $entityIdLength, $entityIdBytes, $keyLength,
         $keyBytes, $valueLength, $valueBytes);
 
     return tcpRequestResponce($socket, $byteArray);
@@ -205,8 +205,8 @@ function ioAssocInJsonBase($socket, $command, $entityId, $key, $deepKey, $value,
     $commandBytes = [$command];
     //1 byte -v mode
     $verboseMode = [$v];
-    //4 bytes - uniqueInt for that request
-    $uniqueInt = Data\intToFourBytes(RequestIdDispenser::dispenseId());
+    //16 bytes - request UUID
+    $requestUUID = RequestIdDispenser::dispenseUUIDBytes();
     //1 byte - length of entityId
     $entityIdLength = [strlen($entityId)];
     //0-127 bytes - entityId
@@ -223,7 +223,7 @@ function ioAssocInJsonBase($socket, $command, $entityId, $key, $deepKey, $value,
     $valueBytes = Data\dispatchToType($value);
     //4 bytes - length of val
     $valueLength = Data\intToFourBytes(count($valueBytes));
-    $byteArray = array_merge($commandBytes, $verboseMode, $uniqueInt, $entityIdLength, $entityIdBytes, $keyLength,
+    $byteArray = array_merge($commandBytes, $verboseMode, $requestUUID, $entityIdLength, $entityIdBytes, $keyLength,
         $keyBytes, $deepKeyLength, $deepKeyBytes, $valueLength, $valueBytes);
 
     return tcpRequestResponce($socket, $byteArray);
@@ -244,8 +244,8 @@ function ioDissocInJsonBase($socket, $command, $entityId, $key, $deepKey, $v)
     $commandBytes = [$command];
     //1 byte -v mode
     $verboseMode = [$v];
-    //4 bytes - uniqueInt for that request
-    $uniqueInt = Data\intToFourBytes(RequestIdDispenser::dispenseId());
+    //16 bytes - request UUID
+    $requestUUID = RequestIdDispenser::dispenseUUIDBytes();
     //1 byte - length of entityId
     $entityIdLength = [strlen($entityId)];
     //0-127 bytes - entityId
@@ -258,7 +258,7 @@ function ioDissocInJsonBase($socket, $command, $entityId, $key, $deepKey, $v)
     $deepKeyLength = Data\intToFourBytes(strlen($deepKey));
     //n bytes - deep_key
     $deepKeyBytes = Data\stringToBytes($deepKey);
-    $byteArray = array_merge($commandBytes, $verboseMode, $uniqueInt, $entityIdLength, $entityIdBytes, $keyLength,
+    $byteArray = array_merge($commandBytes, $verboseMode, $requestUUID, $entityIdLength, $entityIdBytes, $keyLength,
         $keyBytes, $deepKeyLength, $deepKeyBytes);
 
     return tcpRequestResponce($socket, $byteArray);
@@ -280,8 +280,8 @@ function ioGetKeyAsOfBase($socket, $command, $entityId, $key, $timestamp, $v)
     $commandBytes = [$command];
     //1 byte -v mode
     $verboseMode = [$v];
-    //4 bytes - uniqueInt for that request
-    $uniqueInt = Data\intToFourBytes(RequestIdDispenser::dispenseId());
+    //16 bytes - request UUID
+    $requestUUID = RequestIdDispenser::dispenseUUIDBytes();
     //1 byte - length of entityId
     $entityIdLength = [strlen($entityId)];
     //0-127 bytes - entityId
@@ -292,7 +292,7 @@ function ioGetKeyAsOfBase($socket, $command, $entityId, $key, $timestamp, $v)
     $keyBytes = Data\stringToBytes($key);
     //19 bytes - length of timestamp as a string
     $timestampLength = Data\stringToBytes($timestamp);
-    $byteArray = array_merge($commandBytes, $verboseMode, $uniqueInt, $entityIdLength, $entityIdBytes, $keyLength,
+    $byteArray = array_merge($commandBytes, $verboseMode, $requestUUID, $entityIdLength, $entityIdBytes, $keyLength,
         $keyBytes, $timestampLength);
 
     return tcpRequestResponce($socket, $byteArray);
@@ -311,15 +311,15 @@ function ioGetEntityAsOfBase($socket, $command, $entityId, $timestamp, $v)
     $commandBytes = [$command];
     //1 byte -v mode
     $verboseMode = [$v];
-    //4 bytes - uniqueInt for that request
-    $uniqueInt = Data\intToFourBytes(RequestIdDispenser::dispenseId());
+    //16 bytes - request UUID
+    $requestUUID = RequestIdDispenser::dispenseUUIDBytes();
     //1 byte - length of entityId
     $entityIdLength = [strlen($entityId)];
     //0-127 bytes - entityId
     $entityIdBytes = Data\stringToBytes($entityId);
     //19 bytes - length of timestamp as a string
     $timestampBytes = Data\stringToBytes($timestamp);
-    $byteArray = array_merge($commandBytes, $verboseMode, $uniqueInt, $entityIdLength, $entityIdBytes, $timestampBytes);
+    $byteArray = array_merge($commandBytes, $verboseMode, $requestUUID, $entityIdLength, $entityIdBytes, $timestampBytes);
 
     return tcpRequestResponce($socket, $byteArray);
 
@@ -336,8 +336,8 @@ function ioGetAllVersionsBetweenBase($socket, $command, $entityId, $timestampSta
     $commandBytes = [$command];
     //1 byte -v mode
     $verboseMode = [$v];
-    //4 bytes - uniqueInt for that request
-    $uniqueInt = Data\intToFourBytes(RequestIdDispenser::dispenseId());
+    //16 bytes - request UUID
+    $requestUUID = RequestIdDispenser::dispenseUUIDBytes();
     //1 byte - length of entityId
     $entityIdLength = [strlen($entityId)];
     //0-127 bytes - entityId
@@ -348,7 +348,7 @@ function ioGetAllVersionsBetweenBase($socket, $command, $entityId, $timestampSta
     $timestampEndBytes = Data\stringToBytes($timestampEnd);
     //4 bytes - limit
     $limitBytes = Data\intToFourBytes($limit);
-    $byteArray = array_merge($commandBytes, $verboseMode, $uniqueInt, $entityIdLength, $entityIdBytes,
+    $byteArray = array_merge($commandBytes, $verboseMode, $requestUUID, $entityIdLength, $entityIdBytes,
         $timestampStartBytes, $timestampEndBytes, $limitBytes);
 
     return tcpRequestResponce($socket, $byteArray);
@@ -439,7 +439,7 @@ connectToServer("localhost", 10000);
 //
 //var_dump(ioDissocInJson("ryan", "addresses", ["address-1", "state", "full"]));
 //
-//var_dump(ioGetKeyLatest("api-users", "k-1"));
+var_dump(ioGetKeyLatest("api-users", "k-1"));
 //
 //var_dump(ioGetKeyAsOf("api-users", "k-1", time()));
 //
