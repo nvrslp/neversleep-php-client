@@ -73,6 +73,10 @@ function receiveServerTcpResponse($socket)
 
 function sendByteArray($socket, $byteArray)
 {
+
+    //prepend the api version
+    $byteArray = array_merge([1], $byteArray);
+
     $length = count($byteArray);
     if ($length > 2147483647) {
         //cannot send bigger request than that
@@ -355,7 +359,7 @@ function ioGetAllVersionsBetweenBase($socket, $command, $entityId, $timestampSta
 //writes
 function ioAssoc($entityId, $key, $value)
 {
-    return ioAssocBase(Socket::$socket, 1, $entityId, $key, $value, 0);
+    return ioAssocBase(Socket::$socket, 1, $entityId, $key, $value, 1);
 }
 
 function ioAssocInJson($entityId, $key, array $deepKey, $value)
@@ -413,26 +417,27 @@ function connectToServer($ipAddress, $port)
 }
 
 //TODO remove this for production
-connectToServer("54.174.129.3", 10000);
+connectToServer("localhost", 10000);
 
 
 //var_dump(ioAssoc("api-users", "k-2", ["names" => [["first" => "will", "last" => "king"], ["first" => "rangel", "last" => "spasov"]]]));
 
 //var_dump(ioGetEntityLatest("api-users"));
 //
-//var_dump(ioAssoc("api-users-99", "k-1", 2));
+//var_dump(ioAssoc("api-users-99", "k-2", "new-val"));
 //var_dump(ioAssoc("api-users", "k-1", 1));
 //var_dump(ioAssoc("api-users", "k-1", true));
 //var_dump(ioAssoc("api-users", "k-1", "v-1"));
 
 //var_dump(ioDissoc("api-users", "k-1"));
 //
-//var_dump(ioAssocJson("api-users", "k-1", ["names" => [["first" => "will", "last" => "king"], ["first" => "rangel", "last" => "spasov"]]]));
+
+//var_dump(ioAssoc("rangel", "addresses", NULL));
 
 //
-//var_dump(ioAssocInJson("api-users", "k-2", ["names", 1], null));
+//var_dump(ioAssocInJson("ryan", "addresses", ["address-1", "state"], ["short" => "CA", "full" => "California"]));
 //
-//var_dump(ioDissocInJson("api-users", "k-2", ["names", 1]));
+//var_dump(ioDissocInJson("ryan", "addresses", ["address-1", "state", "full"]));
 //
 //var_dump(ioGetKeyLatest("api-users", "k-1"));
 //
@@ -442,7 +447,7 @@ connectToServer("54.174.129.3", 10000);
 //
 //var_dump(ioGetEntityAsOf("api-users-99", time() - 60));
 
-var_dump(ioGetEntityLatest("users-test-3"));
+//var_dump(ioGetEntityLatest("ryan"));
 
 //
 //var_dump(json_decode(ioGetAllVersionsBetweenNowAnd("api-users-99", time() - 3600, 99)), true);
@@ -454,4 +459,4 @@ function test_1() {
         ioAssoc("users-test-3", "k-".$i, "v-".$i);
     }
 }
-test_1();
+//test_1();
