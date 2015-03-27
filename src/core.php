@@ -291,9 +291,9 @@ function ioGetKeyAsOfBase($socket, $command, $entityId, $key, $timestamp, $v)
     //1 byte - length of key
     $keyLength = [count($keyBytes)];
     //19 bytes - length of timestamp as a string
-    $timestampLength = Data\stringToBytes($timestamp);
+    $timestampBytes = Data\stringToBytes($timestamp);
     $byteArray = array_merge($commandBytes, $verboseMode, $requestUUID, $entityIdLength, $entityIdBytes, $keyLength,
-        $keyBytes, $timestampLength);
+        $keyBytes, $timestampBytes);
 
     return tcpRequestResponce($socket, $byteArray);
 
@@ -405,7 +405,7 @@ function ioGetAllVersionsBetween($entityId, $timestampStart, $timestampEnd, $lim
         0);
 }
 
-function ioGetAllVersionsBetweenNowAnd($entityId, $timestampEnd, $limit)
+function ioGetAllVersionsBetweenLatestAnd($entityId, $timestampEnd, $limit)
 {
     return ioGetAllVersionsBetweenBase(Socket::$socket, -126, $entityId, SystemClock\serverLatest(),
         SystemClock\convertTimestampToNano($timestampEnd), $limit, 0);
@@ -432,14 +432,14 @@ connectToServer("localhost", 10000);
 //var_dump(ioDissoc("api-users", "k-1"));
 //
 
-//var_dump(ioAssoc("rangel", "addresses", NULL));
+var_dump(ioAssoc("rangel", "address", "1160 Mission St"));
 
 //
 //var_dump(ioAssocInJson("ryan", "addresses", ["address-1", "state"], ["short" => "CA", "full" => "California"]));
 //
 //var_dump(ioDissocInJson("ryan", "addresses", ["address-1", "state", "full"]));
 //
-var_dump(ioGetKeyLatest("api-users", "k-1"));
+//var_dump(ioGetKeyLatest("api-users", "k-1"));
 //
 //var_dump(ioGetKeyAsOf("api-users", "k-1", time()));
 //
