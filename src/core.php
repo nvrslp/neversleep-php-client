@@ -74,8 +74,8 @@ function receiveServerTcpResponse($socket)
 function sendByteArray($socket, $byteArray)
 {
 
-    //prepend the api version
-    $byteArray = array_merge([1], $byteArray);
+    //prepend language, api version
+    $byteArray = array_merge([1], [1],  $byteArray);
 
     $length = count($byteArray);
     if ($length > 2147483647) {
@@ -422,7 +422,7 @@ connectToServer("localhost", 10000);
 
 //var_dump(ioAssoc("api-users", "k-2", ["names" => [["first" => "will", "last" => "king"], ["first" => "rangel", "last" => "spasov"]]]));
 
-//var_dump(ioGetEntityLatest("api-users"));
+var_dump(ioGetEntityLatest("qwer"));
 //
 //var_dump(ioAssoc("api-users-99", "k-2", "new-val"));
 //var_dump(ioAssoc("api-users", "k-1", 1));
@@ -432,7 +432,7 @@ connectToServer("localhost", 10000);
 //var_dump(ioDissoc("api-users", "k-1"));
 //
 
-var_dump(ioAssoc("rangel", "address", "1160 Mission St"));
+//var_dump(ioAssoc("rangel", "address", "1160 Mission St"));
 
 //
 //var_dump(ioAssocInJson("ryan", "addresses", ["address-1", "state"], ["short" => "CA", "full" => "California"]));
